@@ -78,6 +78,8 @@ public static class DxfFileToken
 
 	public const string EntityInsert = "INSERT";
 
+	public const string EntityLargeRadialDimension = "LARGE_RADIAL_DIMENSION";
+
 	public const string EntityLeader = "LEADER";
 
 	public const string EntityLight = "LIGHT";

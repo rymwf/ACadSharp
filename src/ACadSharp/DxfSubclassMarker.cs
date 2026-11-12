@@ -174,6 +174,8 @@ public static class DxfSubclassMarker
 
 	public const string Leader = "AcDbLeader";
 
+	public const string LargeRadialDimension = "AcDbRadialDimensionLarge";
+
 	public const string Line = "AcDbLine";
 
 	public const string LinearDimension = "AcDbRotatedDimension";

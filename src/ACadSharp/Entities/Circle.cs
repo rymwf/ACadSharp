@@ -51,6 +51,12 @@ public class Circle : Entity, ICurve, IOrientable
 		}
 	}
 
+	internal void SetRadiusFromDxf(double value)
+	{
+		// Keep malformed source data available to validators and downstream readers.
+		this._radius = value;
+	}
+
 	/// <inheritdoc/>
 	public double RadiusRatio { get { return 1; } }
 

@@ -1,5 +1,6 @@
 ﻿using ACadSharp.IO.DXF.DxfStreamReader;
 using ACadSharp.IO.Templates;
+using ACadSharp.Entities;
 using System;
 
 namespace ACadSharp.IO.DXF
@@ -13,6 +14,8 @@ namespace ACadSharp.IO.DXF
 
 		public override void Read()
 		{
+			CadInsertTemplate pendingInsertWithAttributes = null;
+
 			//Advance to the first value in the section
 			this._reader.ReadNext();
 
@@ -39,6 +42,22 @@ namespace ACadSharp.IO.DXF
 				if (template == null)
 					continue;
 
+				if (pendingInsertWithAttributes != null)
+				{
+					if (template.CadObject is AttributeEntity or Seqend)
+					{
+						// Some DXF writers keep the model-space owner on ATTRIB but bind it to the
+						// preceding INSERT through group 66 and the following entity sequence.
+						template.OwnerHandle = pendingInsertWithAttributes.CadObject.Handle;
+					}
+					else
+					{
+						pendingInsertWithAttributes = null;
+					}
+				}
+
+				bool endsInsertAttributes = template.CadObject is Seqend;
+
 				//Add the object and the template to the builder
 				this._builder.AddTemplate(template);
 
@@ -54,6 +73,12 @@ namespace ACadSharp.IO.DXF
 				{
 					_builder.OrphanTemplates.Add(template);
 				}
+
+				if (endsInsertAttributes)
+					pendingInsertWithAttributes = null;
+
+				if (template is CadInsertTemplate insertTemplate && insertTemplate.HasAtts)
+					pendingInsertWithAttributes = insertTemplate;
 			}
 		}
 	}

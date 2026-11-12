@@ -292,6 +292,8 @@ internal abstract class DxfSectionReaderBase
 					return null;
 				}
 				return dimTemplate;
+			case DxfFileToken.EntityLargeRadialDimension:
+				return this.readEntityCodes<Dimension>(new CadDimensionTemplate(), this.readDimension);
 			case DxfFileToken.Entity3DFace:
 				return this.readEntityCodes<Face3D>(new CadEntityTemplate<Face3D>(), this.readEntitySubclassMap);
 			case DxfFileToken.EntityEllipse:
@@ -790,15 +792,7 @@ internal abstract class DxfSectionReaderBase
 		switch (this._reader.Code)
 		{
 			case 40:
-				double radius = this._reader.ValueAsDouble;
-				if (radius <= 0)
-				{
-					circle.Radius = MathHelper.Epsilon;
-				}
-				else
-				{
-					circle.Radius = radius;
-				}
+				circle.SetRadiusFromDxf(this._reader.ValueAsDouble);
 				return true;
 			default:
 				return this.tryAssignCurrentValue(template.CadObject, map);
@@ -1013,6 +1007,10 @@ internal abstract class DxfSectionReaderBase
 					case DxfSubclassMarker.RadialDimension:
 						tmp.SetDimensionObject(new DimensionRadius());
 						map.SubClasses.TryAdd(this._reader.ValueAsString, DxfClassMap.Create<DimensionRadius>());
+						return true;
+					case DxfSubclassMarker.LargeRadialDimension:
+						tmp.SetDimensionObject(new DimensionRadius());
+						map.SubClasses.TryAdd(DxfSubclassMarker.LargeRadialDimension, DxfClassMap.Create<DimensionRadius>());
 						return true;
 					case DxfSubclassMarker.OrdinateDimension:
 						tmp.SetDimensionObject(new DimensionOrdinate());
@@ -1253,6 +1251,7 @@ internal abstract class DxfSectionReaderBase
 				map.SubClasses.TryAdd(this._reader.ValueAsString, map.SubClasses[DxfSubclassMarker.Insert]);
 				return true;
 			case 66:
+				tmp.HasAtts = this._reader.ValueAsBool;
 				return true;
 			default:
 				return this.tryAssignCurrentValue(template.CadObject, map);
